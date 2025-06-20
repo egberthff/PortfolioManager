@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin Panel - Portfolio Management</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: #f4f6f8;
+    color: #222;
+  }
+
+  header {
+    background-color: #014a9c;
+    color: #fff;
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  header h1 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.5rem;
+  }
+
+  header button.logout-btn {
+    background: #f44336;
+    border: none;
+    padding: 8px 18px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #fff;
+    transition: background 0.3s;
+  }
+
+  header button.logout-btn:hover {
+    background: #d32f2f;
+  }
+
+  main {
+    display: flex;
+    min-height: calc(100vh - 64px);
+  }
+
+  nav.side-nav {
+    width: 220px;
+    background: #fff;
+    border-right: 1px solid #ddd;
+    padding: 1rem 0;
+  }
+
+  nav.side-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  nav.side-nav li {
+    padding: 14px 24px;
+    cursor: pointer;
+    font-weight: 600;
+    border-left: 4px solid transparent;
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  nav.side-nav li:hover,
+  nav.side-nav li.active {
+    background: #e6f0fe;
+    border-left: 4px solid #014a9c;
+  }
+
+  section.content-section {
+    flex-grow: 1;
+    padding: 30px 40px;
+    background: #fff;
+    overflow-y: auto;
+  }
+
+  section.content-section h2 {
+    margin-top: 0;
+    color: #014a9c;
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+  }
+
+  /* Form styling */
+  form {
+    max-width: 900px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #014a9c;
+  }
+
+  input[type="text"],
+  input[type="url"],
+  input[type="email"],
+  textarea {
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    border: 1.8px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    resize: vertical;
+    transition: border-color 0.3s;
+  }
+
+  input[type="text"]:focus,
+  input[type="url"]:focus,
+  input[type="email"]:focus,
+  textarea:focus {
+    border-color: #0266d4;
+    outline: none;
+  }
+
+  textarea {
+    min-height: 100px;
+  }
+
+  button,
+  .btn {
+    background-color: #0266d4;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 6px 14px rgba(2,102,212,0.4);
+    transition: background-color 0.3s;
+  }
+
+  button:hover,
+  .btn:hover {
+    background-color: #014a9c;
+  }
+
+  /* List groups for dynamic data */
+  .item-list {
+    margin-bottom: 20px;
+  }
+
+  .item-card {
+    background: #f5f9ff;
+    border: 1px solid #c9dbfd;
+    padding: 15px 20px;
+    margin-bottom: 14px;
+    border-radius: 6px;
+    position: relative;
+  }
+
+  .item-card:last-child {
+    margin-bottom: 0;
+  }
+
+  .item-card > button.delete-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: #e53935;
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    font-weight: 700;
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 24px;
+    text-align: center;
+    transition: background-color 0.3s;
+  }
+
+  .item-card > button.delete-btn:hover {
+    background: #b71c1c;
+  }
+
+  .add-btn-container {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    main {
+      flex-direction: column;
+    }
+    nav.side-nav {
+      width: 100%;
+      display: flex;
+      overflow-x: auto;
+      border-right: none;
+      border-bottom: 1px solid #ddd;
+    }
+    nav.side-nav ul {
+      display: flex;
+    }
+    nav.side-nav li {
+      min-width: 120px;
+      text-align: center;
+      border-left: none;
+      border-bottom: 4px solid transparent;
+    }
+    nav.side-nav li:hover,
+    nav.side-nav li.active {
+      border-bottom: 4px solid #014a9c;
+      border-left: none;
+      background: transparent;
+    }
+    section.content-section {
+      padding: 20px 15px;
+      min-height: auto;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Portfolio Admin Panel</h1>
+  <button class="logout-btn" onclick="logout()">Logout</button>
+</header>
+
+<main>
+  <nav class="side-nav" role="navigation" aria-label="Admin Panel Navigation">
+    <ul>
+      <li class="active" tabindex="0" data-section="about-section">About Me</li>
+      <li tabindex="0" data-section="skills-section">Skills</li>
+      <li tabindex="0" data-section="experience-section">Experience</li>
+      <li tabindex="0" data-section="projects-section">Projects</li>
+      <li tabindex="0" data-section="education-section">Education</li>
+      <li tabindex="0" data-section="certifications-section">Certifications</li>
+      <li tabindex="0" data-section="contact-section">Contact Info</li>
+    </ul>
+  </nav>
+
+  <section class="content-section" id="about-section" tabindex="0">
+    <h2>About Me</h2>
+    <form id="aboutForm">
+      <label for="aboutText">About Me Text</label>
+      <textarea id="aboutText" name="aboutText" rows="6" required></textarea>
+      <button type="submit">Save About Me</button>
+    </form>
+  </section>
+
+  <section class="content-section" id="skills-section" hidden tabindex="0">
+    <h2>Skills</h2>
+    <div class="item-list" id="skillsList" aria-live="polite" aria-relevant="all"></div>
+    <div class="add-btn-container">
+      <button id="addSkillBtn" class="btn" type="button">+ Add Skill</button>
+    </div>
+    <form id="skillEditForm" hidden>
+      <label for="skillName">Skill Name</label>
+      <input type="text" id="skillName" name="skillName" required />
+      <button type="submit">Save Skill</button>
+      <button type="button" id="cancelSkillEditBtn" class="btn" style="background:#777;margin-left:10px;">Cancel</button>
+    </form>
+  </section>
+
+  <section class="content-section" id="experience-section" hidden tabindex="0">
+    <h2>Experience</h2>
+    <div class="item-list" id="experienceList" aria-live="polite" aria-relevant="all"></div>
+    <div class="add-btn-container">
+      <button id="addExperienceBtn" class="btn" type="button">+ Add Experience</button>
+    </div>
+    <form id="experienceEditForm" hidden>
+      <label for="expJobTitle">Job Title</label>
+      <input type="text" id="expJobTitle" name="expJobTitle" required />
+
+      <label for="expCompany">Company</label>
+      <input type="text" id="expCompany" name="expCompany" required />
+
+      <label for="expLocation">Location</label>
+      <input type="text" id="expLocation" name="expLocation" required />
+
+      <label for="expDate">Date Range</label>
+      <input type="text" id="expDate" name="expDate" placeholder="e.g. Jan 2019 - Present" required />
+
+      <label for="expDescription">Description</label>
+      <textarea id="expDescription" name="expDescription" rows="5" required></textarea>
+
+      <button type="submit">Save Experience</button>
+      <button type="button" id="cancelExperienceEditBtn" class="btn" style="background:#777;margin-left:10px;">Cancel</button>
+    </form>
+  </section>
+
+  <section class="content-section" id="projects-section" hidden tabindex="0">
+    <h2>Projects</h2>
+    <div class="item-list" id="projectsList" aria-live="polite" aria-relevant="all"></div>
+    <div class="add-btn-container">
+      <button id="addProjectBtn" class="btn" type="button">+ Add Project</button>
+    </div>
+    <form id="projectEditForm" hidden>
+      <label for="projectTitle">Project Title</label>
+      <input type="text" id="projectTitle" name="projectTitle" required />
+
+      <label for="projectDescription">Description</label>
+      <textarea id="projectDescription" name="projectDescription" rows="5" required></textarea>
+
+      <label for="projectUrl">Project URL (e.g., GitHub link)</label>
+      <input type="url" id="projectUrl" name="projectUrl" placeholder="https://github.com/user/project" />
+
+      <button type="submit">Save Project</button>
+      <button type="button" id="cancelProjectEditBtn" class="btn" style="background:#777;margin-left:10px;">Cancel</button>
+    </form>
+  </section>
+
+  <section class="content-section" id="education-section" hidden tabindex="0">
+    <h2>Education</h2>
+    <div class="item-list" id="educationList" aria-live="polite" aria-relevant="all"></div>
+    <div class="add-btn-container">
+      <button id="addEducationBtn" class="btn" type="button">+ Add Education</button>
+    </div>
+    <form id="educationEditForm" hidden>
+      <label for="eduDegree">Degree</label>
+      <input type="text" id="eduDegree" name="eduDegree" required />
+
+      <label for="eduDuration">Duration</label>
+      <input type="text" id="eduDuration" name="eduDuration" placeholder="e.g. 2011 - 2015" required />
+
+      <label for="eduSchool">School / University</label>
+      <input type="text" id="eduSchool" name="eduSchool" required />
+
+      <button type="submit">Save Education</button>
+      <button type="button" id="cancelEducationEditBtn" class="btn" style="background:#777;margin-left:10px;">Cancel</button>
+    </form>
+  </section>
+
+  <section class="content-section" id="certifications-section" hidden tabindex="0">
+    <h2>Certifications</h2>
+    <div class="item-list" id="certificationsList" aria-live="polite" aria-relevant="all"></div>
+    <div class="add-btn-container">
+      <button id="addCertificationBtn" class="btn" type="button">+ Add Certification</button>
+    </div>
+    <form id="certificationEditForm" hidden>
+      <label for="certTitle">Certification Title</label>
+      <input type="text" id="certTitle" name="certTitle" required />
+
+      <label for="certDate">Issued Date</label>
+      <input type="text" id="certDate" name="certDate" placeholder="e.g. 2020" required />
+
+      <button type="submit">Save Certification</button>
+      <button type="button" id="cancelCertificationEditBtn" class="btn" style="background:#777;margin-left:10px;">Cancel</button>
+    </form>
+  </section>
+
+  <section class="content-section" id="contact-section" hidden tabindex="0">
+    <h2>Contact Info</h2>
+    <form id="contactInfoForm">
+      <label for="contactEmail">Email Address</label>
+      <input type="email" id="contactEmail" name="contactEmail" required />
+
+      <label for="contactLinkedIn">LinkedIn URL</label>
+      <input type="url" id="contactLinkedIn" name="contactLinkedIn" placeholder="https://linkedin.com/in/username" />
+
+      <label for="contactGitHub">GitHub URL</label>
+      <input type="url" id="contactGitHub" name="contactGitHub" placeholder="https://github.com/username" />
+
+      <label for="contactTwitter">Twitter URL</label>
+      <input type="url" id="contactTwitter" name="contactTwitter" placeholder="https://twitter.com/username" />
+
+      <button type="submit">Save Contact Info</button>
+    </form>
+  </section>
+</main>
+
+<script>
+  // Navigation tab switching
+  const navItems = document.querySelectorAll('nav.side-nav li');
+  const contentSections = document.querySelectorAll('section.content-section');
+
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      activateNavItem(item);
+    });
+    item.addEventListener('keypress', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        activateNavItem(item);
+      }
+    });
+  });
+
+  function activateNavItem(selectedItem) {
+    navItems.forEach(item => item.classList.remove('active'));
+    selectedItem.classList.add('active');
+
+    const sectionToShow = selectedItem.dataset.section;
+    contentSections.forEach(section => {
+      if (section.id === sectionToShow) {
+        section.hidden = false;
+        section.focus();
+      } else {
+        section.hidden = true;
+      }
+    });
+  }
+
+  // Logout placeholder
+  function logout() {
+    alert('Logout functionality to be implemented.');
+    // Redirect to login page or clear tokens, etc.
+  }
+
+  // === About Me Management ===
+  const aboutForm = document.getElementById('aboutForm');
+  const aboutTextArea = document.getElementById('aboutText');
+
+  aboutForm.addEventListener('submit', (evt) => {
+    evt.preventDefault();
+    const aboutText = aboutTextArea.value.trim();
+    if (!aboutText) {
+      alert('Please enter about me text.');
+      return;
+    }
+    // TODO: Send "aboutText" to backend API to save
+    alert('About Me saved successfully (simulation).');
+  });
+
+  // === Skills Management ===
+  const skillsListEl = document.getElementById('skillsList');
+  const addSkillBtn = document.getElementById('addSkillBtn');
+  const skillEditForm = document.getElementById('skillEditForm');
+  const skillNameInput = document.getElementById('skillName');
+  const cancelSkillEditBtn = document.getElementById('cancelSkillEditBtn');
+  let skills = [];
+  let editSkillIndex = null;
+
+  addSkillBtn.addEventListener('click', () => {
+    skillEditForm.hidden = false;
+    skillNameInput.value = '';
+    skillNameInput.focus();
+    addSkillBtn.disabled = true;
+  });
+
+  cancelSkillEditBtn.addEventListener('click', () => {
+    skillEditForm.hidden = true;
+    addSkillBtn.disabled = false;
+    editSkillIndex = null;
+  });
+
+  skillEditForm.addEventListener('submit', (evt) => {
+    evt.preventDefault();
+
+    const skillName = skillNameInput.value.trim();
+    if (!skillName) {
+      alert('Skill name cannot be empty.');
+      return;
+    }
+
+    if (editSkillIndex === null) {
+      // Add new skill
+      skills.push(skillName);
+    } else {
+      // Edit existing
+      skills[editSkillIndex] = skillName;
+    }
+    skillEditForm.hidden = true;
+    addSkillBtn.disabled = false;
+    editSkillIndex = null;
+    renderSkills();
+    // TODO: Persist skills array to backend API
+  });
+
+  function renderSkills() {
+    skillsListEl.innerHTML = '';
+    skills.forEach((skill, index) => {
+      const div = document.createElement('div');
+      div.className = 'item-card';
+      div.textContent = skill;
+
+      const editBtn = document.createElement('button');
+      editBtn.textContent = '✏';
+      editBtn.title = 'Edit Skill';
+      editBtn.classList.add('edit-btn');
+      editBtn.style.position = 'absolute';
+      editBtn.style.top = '15px';
+      editBtn.style.right = '50px';
+      editBtn.style.border = 'none';
+      editBtn.style.background = '#0266d4';
+      editBtn.style.color = '#fff';
+      editBtn.style.borderRadius = '50%';
+      editBtn.style.width = '26px';
+      editBtn.style.height = '26px';
+      editBtn.style.cursor = 'pointer';
+      editBtn.addEventListener('click', () => {
+        skillEditForm.hidden = false;
+        skillNameInput.value = skill;
+        skillNameInput.focus();
+        addSkillBtn.disabled = true;
+        editSkillIndex = index;
+      });
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.innerHTML = '×';
+      deleteBtn.title = 'Delete Skill';
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to delete this skill?')) {
+          skills.splice(index, 1);
+          renderSkills();
+          // TODO: Persist skills array to backend API
+        }
+      });
+
+      div.appendChild(editBtn);
+      div.appendChild(deleteBtn);
+      div.style.position = 'relative';
+
+      skillsListEl.appendChild(div);
+    });
+  }
+
+  // === Experience Management ===
+  const experienceListEl = document.getElementById('experienceList');
+  const addExperienceBtn = document.getElementById('addExperienceBtn');
+  const experienceEditForm = document.getElementById('experienceEditForm');
+  const cancelExperienceEditBtn = document.getElementById('cancelExperienceEditBtn');
+
+  let experiences = [];
+  let editExperienceIndex = null;
+
+  addExperienceBtn.addEventListener('click', () => {
+    experienceEditForm.reset();
+    experienceEditForm.hidden = false;
+    addExperienceBtn.disabled = true;
+    experienceEditForm.querySelector('input, textarea').focus();
+  });
+
+  cancelExperienceEditBtn.addEventListener('click', () => {
+    experienceEditForm.hidden = true;
+    addExperienceBtn.disabled = false;
+    editExperienceIndex = null;
+  });
+
+  experienceEditForm.addEventListener('submit', evt => {
+    evt.preventDefault();
+    const jobTitle = document.getElementById('expJobTitle').value.trim();
+    const company = document.getElementById('expCompany').value.trim();
+    const location = document.getElementById('expLocation').value.trim();
+    const date = document.getElementById('expDate').value.trim();
+    const description = document.getElementById('expDescription').value.trim();
+
+    if (!jobTitle || !company || !location || !date || !description) {
+      alert('Please fill in all fields for experience.');
+      return;
+    }
+
+    const expData = { jobTitle, company, location, date, description };
+
+    if (editExperienceIndex === null) {
+      experiences.push(expData);
+    } else {
+      experiences[editExperienceIndex] = expData;
+    }
+
+    experienceEditForm.hidden = true;
+    addExperienceBtn.disabled = false;
+    editExperienceIndex = null;
+    renderExperiences();
+    // TODO: Persist experiences data to backend API
+  });
+
+  function renderExperiences() {
+    experienceListEl.innerHTML = '';
+    experiences.forEach((exp, idx) => {
+      const div = document.createElement('div');
+      div.className = 'item-card';
+
+      const h3 = document.createElement('h3');
+      h3.textContent = exp.jobTitle;
+      h3.style.color = '#0266d4';
+
+      const companyDiv = document.createElement('div');
+      companyDiv.textContent = exp.company;
+      companyDiv.style.fontStyle = 'italic';
+      companyDiv.style.color = '#555';
+      companyDiv.style.marginBottom = '4px';
+
+      const locationDateDiv = document.createElement('div');
+      locationDateDiv.textContent = `${exp.location} | ${exp.date}`;
+      locationDateDiv.style.fontSize = '0.9rem';
+      locationDateDiv.style.color = '#777';
+      locationDateDiv.style.marginBottom = '10px';
+
+      const descP = document.createElement('p');
+      descP.textContent = exp.description;
+      descP.style.color = '#555';
+
+      const editBtn = document.createElement('button');
+      editBtn.textContent = '✏';
+      editBtn.title = 'Edit Experience';
+      editBtn.style.position = 'absolute';
+      editBtn.style.top = '15px';
+      editBtn.style.right = '50px';
+      editBtn.style.border = 'none';
+      editBtn.style.background = '#0266d4';
+      editBtn.style.color = '#fff';
+      editBtn.style.borderRadius = '50%';
+      editBtn.style.width = '26px';
+      editBtn.style.height = '26px';
+      editBtn.style.cursor = 'pointer';
+      editBtn.addEventListener('click', () => {
+        experienceEditForm.hidden = false;
+        document.getElementById('expJobTitle').value = exp.jobTitle;
+        document.getElementById('expCompany').value = exp.company;
+        document.getElementById('expLocation').value = exp.location;
+        document.getElementById('expDate').value = exp.date;
+        document.getElementById('expDescription').value = exp.description;
+        addExperienceBtn.disabled = true;
+        editExperienceIndex = idx;
+      });
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.innerHTML = '×';
+      deleteBtn.title = 'Delete Experience';
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to delete this experience?')) {
+          experiences.splice(idx, 1);
+          renderExperiences();
+          // TODO: Persist experiences data to backend API
+        }
+      });
+
+      div.appendChild(h3);
+      div.appendChild(companyDiv);
+      div.appendChild(locationDateDiv);
+      div.appendChild(descP);
+      div.appendChild(editBtn);
+      div.appendChild(deleteBtn);
+      div.style.position = 'relative';
+
+      experienceListEl.appendChild(div);
+    });
+  }
+
+  // === Projects Management ===
+  const projectsListEl = document.getElementById('projectsList');
+  const addProjectBtn = document.getElementById('addProjectBtn');
+  const projectEditForm = document.getElementById('projectEditForm');
+  const cancelProjectEditBtn = document.getElementById('cancelProjectEditBtn');
+
+  let projects = [];
+  let editProjectIndex = null;
+
+  addProjectBtn.addEventListener('click', () => {
+    projectEditForm.reset();
+    projectEditForm.hidden = false;
+    addProjectBtn.disabled = true;
+    projectEditForm.querySelector('input, textarea').focus();
+  });
+
+  cancelProjectEditBtn.addEventListener('click', () => {
+    projectEditForm.hidden = true;
+    addProjectBtn.disabled = false;
+    editProjectIndex = null;
+  });
+
+  projectEditForm.addEventListener('submit', evt => {
+    evt.preventDefault();
+
+    const title = document.getElementById('projectTitle').value.trim();
+    const description = document.getElementById('projectDescription').value.trim();
+    const url = document.getElementById('projectUrl').value.trim();
+
+    if (!title || !description) {
+      alert('Please provide project title and description.');
+      return;
+    }
+
+    const projectData = { title, description, url };
+
+    if (editProjectIndex === null) {
+      projects.push(projectData);
+    } else {
+      projects[editProjectIndex] = projectData;
+    }
+
+    projectEditForm.hidden = true;
+    addProjectBtn.disabled = false;
+    editProjectIndex = null;
+    renderProjects();
+    // TODO: Persist projects to backend API
+  });
+
+  function renderProjects() {
+    projectsListEl.innerHTML = '';
+    projects.forEach((proj, idx) => {
+      const div = document.createElement('div');
+      div.className = 'item-card';
+
+      const h4 = document.createElement('h4');
+      h4.textContent = proj.title;
+      h4.style.color = '#014a9c';
+      h4.style.marginBottom = '8px';
+
+      const descP = document.createElement('p');
+      descP.textContent = proj.description;
+      descP.style.color = '#555';
+
+      div.appendChild(h4);
+      div.appendChild(descP);
+
+      if (proj.url) {
+        const a = document.createElement('a');
+        a.href = proj.url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = 'Project Link';
+        a.style.display = 'inline-block';
+        a.style.marginTop = '12px';
+        a.style.fontWeight = '600';
+        a.style.color = '#0266d4';
+        a.addEventListener('mouseover', () => a.style.color = '#014a9c');
+        a.addEventListener('mouseout', () => a.style.color = '#0266d4');
+        div.appendChild(a);
+      }
+
+      const editBtn = document.createElement('button');
+      editBtn.textContent = '✏';
+      editBtn.title = 'Edit Project';
+      editBtn.style.position = 'absolute';
+      editBtn.style.top = '15px';
+      editBtn.style.right = '50px';
+      editBtn.style.border = 'none';
+      editBtn.style.background = '#0266d4';
+      editBtn.style.color = '#fff';
+      editBtn.style.borderRadius = '50%';
+      editBtn.style.width = '26px';
+      editBtn.style.height = '26px';
+      editBtn.style.cursor = 'pointer';
+      editBtn.addEventListener('click', () => {
+        projectEditForm.hidden = false;
+        document.getElementById('projectTitle').value = proj.title;
+        document.getElementById('projectDescription').value = proj.description;
+        document.getElementById('projectUrl').value = proj.url || '';
+        addProjectBtn.disabled = true;
+        editProjectIndex = idx;
+      });
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.innerHTML = '×';
+      deleteBtn.title = 'Delete Project';
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to delete this project?')) {
+          projects.splice(idx, 1);
+          renderProjects();
+          // TODO: Persist projects data to backend API
+        }
+      });
+
+      div.appendChild(editBtn);
+      div.appendChild(deleteBtn);
+      div.style.position = 'relative';
+
+      projectsListEl.appendChild(div);
+    });
+  }
+
+  // === Education Management ===
+  const educationListEl = document.getElementById('educationList');
+  const addEducationBtn = document.getElementById('addEducationBtn');
+  const educationEditForm = document.getElementById('educationEditForm');
+  const cancelEducationEditBtn = document.getElementById('cancelEducationEditBtn');
+
+  let educations = [];
+  let editEducationIndex = null;
+
+  addEducationBtn.addEventListener('click', () => {
+    educationEditForm.reset();
+    educationEditForm.hidden = false;
+    addEducationBtn.disabled = true;
+    educationEditForm.querySelector('input').focus();
+  });
+
+  cancelEducationEditBtn.addEventListener('click', () => {
+    educationEditForm.hidden = true;
+    addEducationBtn.disabled = false;
+    editEducationIndex = null;
+  });
+
+  educationEditForm.addEventListener('submit', evt => {
+    evt.preventDefault();
+
+    const degree = document.getElementById('eduDegree').value.trim();
+    const duration = document.getElementById('eduDuration').value.trim();
+    const school = document.getElementById('eduSchool').value.trim();
+
+    if (!degree || !duration || !school) {
+      alert('Please fill all fields for education.');
+      return;
+    }
+
+    const eduData = { degree, duration, school };
+
+    if (editEducationIndex === null) {
+      educations.push(eduData);
+    } else {
+      educations[editEducationIndex] = eduData;
+    }
+
+    educationEditForm.hidden = true;
+    addEducationBtn.disabled = false;
+    editEducationIndex = null;
+    renderEducations();
+    // TODO: Persist education data to backend API
+  });
+
+  function renderEducations() {
+    educationListEl.innerHTML = '';
+    educations.forEach((edu, idx) => {
+      const div = document.createElement('div');
+      div.className = 'item-card';
+
+      const h4 = document.createElement('h4');
+      h4.textContent = edu.degree;
+      h4.style.color = '#0266d4';
+
+      const durationDiv = document.createElement('div');
+      durationDiv.textContent = edu.duration;
+      durationDiv.style.fontStyle = 'italic';
+      durationDiv.style.color = '#666';
+
+      const schoolP = document.createElement('p');
+      schoolP.textContent = edu.school;
+      schoolP.style.color = '#444';
+
+      const editBtn = document.createElement('button');
+      editBtn.textContent = '✏';
+      editBtn.title = 'Edit Education';
+      editBtn.style.position = 'absolute';
+      editBtn.style.top = '15px';
+      editBtn.style.right = '50px';
+      editBtn.style.border = 'none';
+      editBtn.style.background = '#0266d4';
+      editBtn.style.color = '#fff';
+      editBtn.style.borderRadius = '50%';
+      editBtn.style.width = '26px';
+      editBtn.style.height = '26px';
+      editBtn.style.cursor = 'pointer';
+      editBtn.addEventListener('click', () => {
+        educationEditForm.hidden = false;
+        document.getElementById('eduDegree').value = edu.degree;
+        document.getElementById('eduDuration').value = edu.duration;
+        document.getElementById('eduSchool').value = edu.school;
+        addEducationBtn.disabled = true;
+        editEducationIndex = idx;
+      });
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.innerHTML = '×';
+      deleteBtn.title = 'Delete Education';
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to delete this education entry?')) {
+          educations.splice(idx, 1);
+          renderEducations();
+          // TODO: Persist education data to backend API
+        }
+      });
+
+      div.appendChild(h4);
+      div.appendChild(durationDiv);
+      div.appendChild(schoolP);
+      div.appendChild(editBtn);
+      div.appendChild(deleteBtn);
+      div.style.position = 'relative';
+
+      educationListEl.appendChild(div);
+    });
+  }
+
+  // === Certifications Management ===
+  const certificationsListEl = document.getElementById('certificationsList');
+  const addCertificationBtn = document.getElementById('addCertificationBtn');
+  const certificationEditForm = document.getElementById('certificationEditForm');
+  const cancelCertificationEditBtn = document.getElementById('cancelCertificationEditBtn');
+
+  let certifications = [];
+  let editCertificationIndex = null;
+
+  addCertificationBtn.addEventListener('click', () => {
+    certificationEditForm.reset();
+    certificationEditForm.hidden = false;
+    addCertificationBtn.disabled = true;
+    certificationEditForm.querySelector('input').focus();
+  });
+
+  cancelCertificationEditBtn.addEventListener('click', () => {
+    certificationEditForm.hidden = true;
+    addCertificationBtn.disabled = false;
+    editCertificationIndex = null;
+  });
+
+  certificationEditForm.addEventListener('submit', evt => {
+    evt.preventDefault();
+
+    const title = document.getElementById('certTitle').value.trim();
+    const date = document.getElementById('certDate').value.trim();
+
+    if (!title || !date) {
+      alert('Please fill all fields for certification.');
+      return;
+    }
+
+    const certData = { title, date };
+
+    if (editCertificationIndex === null) {
+      certifications.push(certData);
+    } else {
+      certifications[editCertificationIndex] = certData;
+    }
+
+    certificationEditForm.hidden = true;
+    addCertificationBtn.disabled = false;
+    editCertificationIndex = null;
+    renderCertifications();
+    // TODO: Persist certifications data to backend API
+  });
+
+  function renderCertifications() {
+    certificationsListEl.innerHTML = '';
+    certifications.forEach((cert, idx) => {
+      const div = document.createElement('div');
+      div.className = 'item-card';
+
+      const h4 = document.createElement('h4');
+      h4.textContent = cert.title;
+      h4.style.color = '#0266d4';
+
+      const dateDiv = document.createElement('div');
+      dateDiv.textContent = `Issued: ${cert.date}`;
+      dateDiv.style.fontStyle = 'italic';
+      dateDiv.style.color = '#666';
+
+      const editBtn = document.createElement('button');
+      editBtn.textContent = '✏';
+      editBtn.title = 'Edit Certification';
+      editBtn.style.position = 'absolute';
+      editBtn.style.top = '15px';
+      editBtn.style.right = '50px';
+      editBtn.style.border = 'none';
+      editBtn.style.background = '#0266d4';
+      editBtn.style.color = '#fff';
+      editBtn.style.borderRadius = '50%';
+      editBtn.style.width = '26px';
+      editBtn.style.height = '26px';
+      editBtn.style.cursor = 'pointer';
+      editBtn.addEventListener('click', () => {
+        certificationEditForm.hidden = false;
+        document.getElementById('certTitle').value = cert.title;
+        document.getElementById('certDate').value = cert.date;
+        addCertificationBtn.disabled = true;
+        editCertificationIndex = idx;
+      });
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.innerHTML = '×';
+      deleteBtn.title = 'Delete Certification';
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to delete this certification?')) {
+          certifications.splice(idx, 1);
+          renderCertifications();
+          // TODO: Persist certifications data to backend API
+        }
+      });
+
+      div.appendChild(h4);
+      div.appendChild(dateDiv);
+      div.appendChild(editBtn);
+      div.appendChild(deleteBtn);
+      div.style.position = 'relative';
+
+      certificationsListEl.appendChild(div);
+    });
+  }
+
+  // === Contact Info Management ===
+  const contactInfoForm = document.getElementById('contactInfoForm');
+
+  contactInfoForm.addEventListener('submit', evt => {
+    evt.preventDefault();
+    const email = contactInfoForm.contactEmail.value.trim();
+    const linkedin = contactInfoForm.contactLinkedIn.value.trim();
+    const github = contactInfoForm.contactGitHub.value.trim();
+    const twitter = contactInfoForm.contactTwitter.value.trim();
+
+    if (!email) {
+      alert('Email address is required.');
+      return;
+    }
+
+    // TODO: validate URLs format if needed
+
+    // TODO: send contact info to backend API
+
+    alert('Contact information saved successfully (simulation).');
+  });
+
+  // === Initialization (placeholder for fetching data from backend) ===
+  function initializeData() {
+    // TODO: Fetch all data (about, skills, experience, etc.) via API calls and populate state variables and UI
+
+    // Example placeholder data initialization:
+    aboutTextArea.value = "I am a passionate IT professional with over 8 years of experience in designing, developing, and maintaining software solutions.";
+
+    skills = ['JavaScript', 'React.js', 'Node.js', 'Python', 'AWS Cloud'];
+    renderSkills();
+
+    experiences = [
+      {
+        jobTitle: 'Senior Software Engineer',
+        company: 'TechCorp Solutions',
+        location: 'New York, NY',
+        date: 'Jan 2019 - Present',
+        description: 'Leading development teams and architecting solutions.'
+      }
+    ];
+    renderExperiences();
+
+    projects = [
+      {
+        title: 'SmartHome IoT Platform',
+        description: 'Cloud-integrated IoT platform for smart homes.',
+        url: 'https://github.com/johndoe/smarthome-iot'
+      }
+    ];
+    renderProjects();
+
+    educations = [
+      {
+        degree: 'Bachelor of Science in Computer Science',
+        duration: '2011 - 2015',
+        school: 'University of California, Berkeley'
+      }
+    ];
+    renderEducations();
+
+    certifications = [
+      {
+        title: 'AWS Certified Solutions Architect – Associate',
+        date: '2021'
+      }
+    ];
+    renderCertifications();
+
+    contactInfoForm.contactEmail.value = 'john.doe@example.com';
+    contactInfoForm.contactLinkedIn.value = 'https://linkedin.com/in/johndoe';
+    contactInfoForm.contactGitHub.value = 'https://github.com/johndoe';
+    contactInfoForm.contactTwitter.value = 'https://twitter.com/johndoe';
+  }
+
+  // Call initialize on page load
+  window.addEventListener('load', initializeData);
+
+</script>
+
+</body>
+</html>
+
